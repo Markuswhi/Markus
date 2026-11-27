@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#15131d">
+  <title>MARKUS — Пиксельный суд</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f4edcf;
+      --muted: #b7ad98;
+      --panel: #252331;
+      --line: #625c70;
+      --gold: #ffd166;
+      --red: #ff647c;
+      --green: #9de6a5;
+      --shadow: #09080e;
+      font-family: "Press Start 2P", "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: #15131d; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background-color: #15131d;
+      background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 8px 8px;
+      font-size: 10px;
+      line-height: 1.9;
+    }
+
+    button, textarea { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    .page { width: min(100% - 28px, 1040px); margin: 0 auto; padding: 28px 0 42px; }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
+    .brand { color: var(--gold); font-size: clamp(16px, 4vw, 22px); letter-spacing: 2px; }
+    .case-number { color: var(--muted); text-align: right; font-size: 8px; line-height: 1.8; }
+    .pixel-box { border: 4px solid var(--line); background: var(--panel); box-shadow: 6px 6px 0 var(--shadow); }
+    .courtroom { padding: clamp(14px, 3vw, 26px); }
+    h1 { margin: 0 0 12px; color: var(--gold); font-size: clamp(15px, 3.4vw, 23px); line-height: 1.7; }
+    .intro { margin: 0; color: var(--muted); font-size: 9px; line-height: 2; }
+    .cast { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 22px 0; }
+    .character { min-width: 0; padding: 12px; text-align: center; border: 3px solid var(--line); background: #1d1b27; }
+    .sprite-slot {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: min(100%, 126px);
+      aspect-ratio: 1;
+      margin: 0 auto 10px;
+      overflow: hidden;
+      border: 3px solid #716b80;
+      background: repeating-linear-gradient(135deg, #383446 0 8px, #302d3d 8px 16px);
+      color: white;
+      font-family: sans-serif;
+      font-size: clamp(42px, 9vw, 66px);
+      image-rendering: pixelated;
+    }
+    /* Для замены на PNG поместите <img src="..." alt="..."> внутрь .sprite-slot. */
+    .sprite-slot img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+    .character-name { display: block; color: var(--gold); font-size: 8px; line-height: 1.8; }
+    .character-note { display: block; margin-top: 5px; color: var(--muted); font-size: 7px; line-height: 1.8; }
+
+    /* Пиксельный Маркус: рыжий кот в чёрном адвокатском костюме. */
+    .cat-art { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    .cat-head {
+      position: absolute; z-index: 3; top: 15%; left: 50%; width: 54%; height: 39%;
+      transform: translateX(-50%); background: #f28a2e; clip-path: polygon(18% 0, 35% 0, 35% 13%, 65% 13%, 65% 0, 82% 0, 82% 16%, 100% 16%, 100% 79%, 82% 79%, 82% 92%, 65% 92%, 65% 100%, 35% 100%, 35% 92%, 18% 92%, 18% 79%, 0 79%, 0 16%, 18% 16%);
+      filter: drop-shadow(3px 0 #713714) drop-shadow(-3px 0 #713714) drop-shadow(0 3px #713714);
+    }
+    .cat-ear { position: absolute; z-index: 2; top: 7%; width: 23%; height: 26%; background: #713714; clip-path: polygon(0 100%, 10% 20%, 45% 0, 100% 100%); }
+    .cat-ear.left { left: 23%; transform: scaleX(-1); }
+    .cat-ear.right { right: 23%; }
+    .cat-ear::after { content: ""; position: absolute; inset: 7px 7px 4px; background: #f28a2e; clip-path: polygon(0 100%, 16% 25%, 48% 0, 100% 100%); }
+    .cat-eye { position: absolute; top: 39%; width: 5px; height: 6px; background: #241b18; }
+    .cat-eye.left { left: 25%; }
+    .cat-eye.right { right: 25%; }
+    .cat-nose { position: absolute; top: 61%; left: 50%; width: 7px; height: 5px; transform: translateX(-50%); background: #713b32; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+    .cat-muzzle { position: absolute; top: 65%; left: 50%; width: 24%; height: 14%; transform: translateX(-50%); background: #ffd2a0; clip-path: polygon(0 0, 100% 0, 82% 100%, 18% 100%); }
+    .cat-whiskers { position: absolute; top: 65%; width: 29%; height: 2px; background: #ffe0bb; box-shadow: 0 6px #ffe0bb; }
+    .cat-whiskers.left { left: -3%; transform: rotate(5deg); }
+    .cat-whiskers.right { right: -3%; transform: rotate(-5deg); }
+    .cat-body {
+      position: absolute; z-index: 1; bottom: -13%; left: 50%; width: 76%; height: 49%;
+      transform: translateX(-50%); background: #11131b; border: 4px solid #08090e;
+      clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%);
+    }
+    .cat-lapel { position: absolute; z-index: 2; bottom: 3%; width: 25%; height: 35%; background: #292b36; clip-path: polygon(0 0, 100% 35%, 70% 100%, 35% 53%); }
+    .cat-lapel.left { left: 25%; }
+    .cat-lapel.right { right: 25%; transform: scaleX(-1); }
+    .cat-shirt { position: absolute; z-index: 2; bottom: 2%; left: 50%; width: 24%; height: 37%; transform: translateX(-50%); background: #e8e3d5; clip-path: polygon(0 0, 100% 0, 72% 100%, 50% 77%, 28% 100%); }
+    .cat-tie { position: absolute; z-index: 3; bottom: 3%; left: 50%; width: 10%; height: 29%; transform: translateX(-50%); background: #b73543; clip-path: polygon(50% 0, 100% 18%, 70% 100%, 30% 100%, 0 18%); }
+    .cat-art.is-shocked .cat-eye { width: 8px; height: 10px; background: #fff4d6; box-shadow: inset 0 0 0 2px #251b18; }
+    .cat-art.is-shocked .cat-nose { width: 9px; height: 9px; clip-path: none; border-radius: 50%; }
+    .criminal-art { position: relative; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(#34313d 0 47%, #211f28 47%); }
+    .criminal-head { position: absolute; z-index: 1; top: 13%; left: 50%; width: 39%; height: 39%; transform: translateX(-50%); background: #b98569; clip-path: polygon(18% 0, 82% 0, 100% 22%, 90% 82%, 70% 100%, 27% 94%, 8% 75%, 0 24%); box-shadow: inset 0 -8px #79564e; }
+    .criminal-hair { position: absolute; z-index: 2; top: 10%; left: 29%; width: 43%; height: 20%; background: #25232a; clip-path: polygon(0 25%, 20% 0, 46% 20%, 64% 0, 100% 10%, 88% 100%, 12% 100%); }
+    .criminal-eye { position: absolute; top: 43%; width: 6px; height: 4px; background: #211c1b; }
+    .criminal-eye.left { left: 23%; }
+    .criminal-eye.right { right: 23%; }
+    .prison-robe { position: absolute; bottom: -8%; left: 50%; width: 78%; height: 49%; transform: translateX(-50%); background: repeating-linear-gradient(90deg, #ded5c3 0 12px, #33313a 12px 19px); clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%); border-top: 5px solid #24222a; }
+    .prison-bar { position: absolute; z-index: 4; top: 0; bottom: 0; width: 5px; background: #85808a; box-shadow: 2px 0 #393640; opacity: .9; }
+    .prison-bar.one { left: 24%; } .prison-bar.two { left: 48%; } .prison-bar.three { left: 72%; }
+    .status-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 14px; color: var(--muted); font-size: 8px; }
+    .loss-counter { color: var(--red); white-space: nowrap; }
+    .evidence { padding: 14px; margin-bottom: 18px; border-left: 4px solid var(--gold); background: #1c1a25; color: var(--ink); font-size: 9px; line-height: 2; }
+    .evidence strong { color: var(--gold); }
+    label { display: block; margin-bottom: 8px; color: var(--gold); font-size: 9px; line-height: 1.8; }
+    textarea {
+      display: block; width: 100%; min-height: 150px; resize: vertical; padding: 14px;
+      border: 3px solid var(--line); border-radius: 0; outline: none;
+      background: #13121a; color: var(--ink); font-size: 10px; line-height: 2;
+      caret-color: var(--gold); user-select: text;
+    }
+    textarea:focus { border-color: var(--gold); }
+    textarea::placeholder { color: #817a8f; opacity: 1; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .action {
+      min-height: 48px; padding: 12px 16px; border: 3px solid #fff0b8; border-radius: 0;
+      background: var(--gold); color: #211b1a; box-shadow: 4px 4px 0 #8b6126;
+      cursor: pointer; font-size: 9px; line-height: 1.7; text-align: center;
+    }
+    .action:hover { background: #ffe39a; transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #8b6126; }
+    .action:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #8b6126; }
+    .action.secondary { border-color: #888294; background: #393645; color: var(--ink); box-shadow: 4px 4px 0 #111; }
+    .action.secondary:hover { background: #494556; }
+    .verdict { min-height: 96px; margin-top: 22px; padding: 15px; border: 3px dashed var(--line); background: #1b1924; color: var(--ink); font-size: 9px; line-height: 2; }
+    .verdict strong { color: var(--gold); }
+    .verdict.is-win { border-color: var(--green); }
+    .verdict.is-loss { border-color: var(--red); }
+    .verdict.is-neutral { border-color: #9d91c5; }
+    .footer { margin-top: 20px; color: #827b8d; font-size: 7px; text-align: center; line-height: 2; }
+    .achievement { position: fixed; z-index: 5; top: 0; left: 50%; display: flex; align-items: center; gap: 13px; width: min(560px, calc(100% - 24px)); padding: 12px; transform: translate(-50%, -130%); border: 4px solid var(--gold); background: #282333; box-shadow: 6px 6px 0 #09080e; transition: transform .65s steps(8, end); pointer-events: none; }
+    .achievement.show { transform: translate(-50%, 12px); } .achievement .sprite-slot { flex: 0 0 62px; width: 62px; margin: 0; font-size: 36px; } .achievement-title { display: block; color: var(--gold); font-size: 8px; line-height: 1.8; } .achievement-name { display: block; margin-top: 4px; font-size: 8px; line-height: 1.8; }
+    body.shake { animation: shake .38s steps(2, end); } @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+    @media (max-width: 580px) {
+      .page { width: min(100% - 20px, 1040px); padding-top: 18px; }
+      .cast { gap: 7px; margin: 16px 0; }
+      .character { padding: 8px 4px; border-width: 2px; }
+      .sprite-slot { border-width: 2px; }
+      .character-name { font-size: 7px; }
+      .character-note { font-size: 6px; }
+      .courtroom { padding: 13px; }
+      .evidence { font-size: 8px; }
+      textarea { min-height: 135px; font-size: 9px; }
+      .action { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; }
+      .achievement { transition-duration: .01ms; }
+      body.shake { animation-duration: .01ms; }
+    }
+  </style>
+</head>
+<body>
+  <div class="achievement" id="achievement" role="status" aria-live="polite">
+    <div class="sprite-slot" aria-label="Иконка ачивки">🏆</div>
+    <div>
+      <span class="achievement-title">НОВАЯ АЧИВКА</span>
+      <span class="achievement-name">Это было нечестно. Мем.</span>
+    </div>
+  </div>
+
+  <main class="page">
+    <header class="topline">
+      <div class="brand">MARKUS</div>
+      <div class="case-number">ДЕЛО № 17<br>СУД ИДЁТ</div>
+    </header>
+
+    <section class="courtroom pixel-box" aria-labelledby="title">
+      <h1 id="title">НАРОД ПРОТИВ ЗДРАВОГО СМЫСЛА</h1>
+      <p class="intro">Вы — прокурор. На кону судьба особо опасного преступника. Его адвокат — кот Маркус: непобедимый, невозмутимый и абсолютно пофигистичный.</p>
+
+      <div class="cast" aria-label="Участники суда">
+        <div class="character">
+          <div class="sprite-slot" aria-label="Место для спрайта судьи">👨‍⚖️</div>
+          <span class="character-name">СУДЬЯ</span>
+          <span class="character-note">Решает судьбу дела</span>
+        </div>
+        <div class="character">
+          <div class="sprite-slot" aria-label="Пиксельный портрет преступника">
+            <div class="criminal-art" aria-hidden="true">
+              <span class="criminal-hair"></span><span class="criminal-head"><i class="criminal-eye left"></i><i class="criminal-eye right"></i></span>
+              <span class="prison-robe"></span><i class="prison-bar one"></i><i class="prison-bar two"></i><i class="prison-bar three"></i>
+            </div>
+          </div>
+          <span class="character-name">ПРЕСТУПНИК</span>
+          <span class="character-note">17 жертв. Без комментариев.</span>
+        </div>
+        <div class="character" id="markusCard">
+          <div class="sprite-slot" aria-label="Место для спрайта Маркуса">
+            <div class="cat-art" id="markusSprite" aria-hidden="true">
+              <span class="cat-ear left"></span><span class="cat-ear right"></span>
+              <span class="cat-head"><i class="cat-eye left"></i><i class="cat-eye right"></i><i class="cat-nose"></i><i class="cat-muzzle"></i><i class="cat-whiskers left"></i><i class="cat-whiskers right"></i></span>
+              <span class="cat-body"></span><span class="cat-lapel left"></span><span class="cat-lapel right"></span><span class="cat-shirt"></span><span class="cat-tie"></span>
+            </div>
+          </div>
+          <span class="character-name">МАРКУС</span>
+          <span class="character-note">Адвокат. Ему всё равно.</span>
+        </div>
+      </div>
+
+      <div class="status-row"><span>ПРОКУРОР, ВАШ ХОД</span><span class="loss-counter">ПОРАЖЕНИЯ: <b id="lossCount">0</b></span></div><div class="evidence"><strong>МАТЕРИАЛЫ ДЕЛА:</strong> у преступника 17 жертв. Улики подтверждают обвинение. Суд ждёт вашей речи.</div>
+
+      <label for="speech">ВАША ОБВИНИТЕЛЬНАЯ РЕЧЬ:</label>
+      <textarea id="speech" maxlength="4000" spellcheck="false" autocomplete="off" placeholder="Введите речь вручную..."></textarea>
+
+      <div class="button-row">
+        <button class="action" id="speakButton" type="button">Выступить с речью!</button>
+      </div>
+
+      <div class="verdict" id="verdict" aria-live="polite">Судья поправляет парик. Маркус смотрит в пустоту. <strong>Ваше слово.</strong></div>
+    </section>
+    <footer class="footer">ПИКСЕЛЬНЫЙ СУД • МАРКУС НЕ ДАЁТ ПОКАЗАНИЙ</footer>
+  </main>
+
+  <script>
+    (() => {
+      const speechField = document.getElementById('speech');
+      const verdict = document.getElementById('verdict');
+      const lossCount = document.getElementById('lossCount');
+      const achievement = document.getElementById('achievement');
+      const markusSprite = document.getElementById('markusSprite');
+      const speechTerms = ['улики', 'жертв', '17', 'виновен', 'убийца', 'преступник', 'закон', 'суд'];
+      const lossStorageKey = 'markus-losses';
+      const achievementStorageKey = 'markus-achievement-unfair-meme';
+      const submittedSpeeches = new Set();
+      let audioContext = null;
+
+      try {
+        lossCount.textContent = String(Math.max(0, Number(localStorage.getItem(lossStorageKey)) || 0));
+      } catch (_) { /* Игра работает и без localStorage. */ }
+
+      // Блокируем вставку и перенос текста, включая команды и мобильные события ввода.
+      for (const eventName of ['paste', 'drop']) {
+        speechField.addEventListener(eventName, event => event.preventDefault());
+      }
+      speechField.addEventListener('beforeinput', event => {
+        if (event.inputType === 'insertFromPaste' || event.inputType === 'insertFromDrop') event.preventDefault();
+      });
+      speechField.addEventListener('dragover', event => event.preventDefault());
+      speechField.addEventListener('keydown', event => {
+        if ((event.ctrlKey || event.metaKey) && ['v', 'x'].includes(event.key.toLowerCase())) event.preventDefault();
+      });
+
+      function setVerdict(message, type) {
+        verdict.className = 'verdict' + (type ? ' is-' + type : '');
+        verdict.innerHTML = message;
+      }
+
+      function getWords(text) {
+        return text.toLocaleLowerCase('ru-RU').match(/[а-яё0-9]+/giu) || [];
+      }
+
+      function containsCaseWord(words) {
+        return words.some(word => speechTerms.some(term => term === '17' ? word === term : word.includes(term)));
+      }
+
+      function playMeow() {
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          audioContext ||= new AudioContextClass();
+          if (audioContext.state === 'suspended') audioContext.resume();
+          const now = audioContext.currentTime;
+          const oscillator = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          const filter = audioContext.createBiquadFilter();
+          oscillator.type = 'square';
+          oscillator.frequency.setValueAtTime(560, now);
+          oscillator.frequency.exponentialRampToValueAtTime(310, now + 0.12);
+          oscillator.frequency.exponentialRampToValueAtTime(190, now + 0.29);
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(1500, now);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(0.16, now + 0.025);
+          gain.gain.setValueAtTime(0.12, now + 0.13);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+          oscillator.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioContext.destination);
+          oscillator.start(now);
+          oscillator.stop(now + 0.35);
+        } catch (_) { /* Звук не должен мешать игре. */ }
+      }
+
+      function countLoss() {
+        const next = (Number(lossCount.textContent) || 0) + 1;
+        lossCount.textContent = String(next);
+        try { localStorage.setItem(lossStorageKey, String(next)); } catch (_) { /* Необязательно. */ }
+      }
+
+      function acquit() {
+        document.body.classList.remove('shake');
+        void document.body.offsetWidth;
+        document.body.classList.add('shake');
+        playMeow();
+        countLoss();
+        setVerdict('<strong>МАРКУС:</strong> «Мяу.»<br>Обвиняемый оправдан. Маркус уже забыл, что был суд.', 'loss');
+      }
+
+      function winCase() {
+        playMeow();
+        setVerdict('<strong>МАРКУС:</strong> «Мяу.»<br>Дело закрыто. Маркус победил.', 'win');
+        markusSprite.classList.add('is-shocked');
+        try { localStorage.setItem(achievementStorageKey, 'true'); } catch (_) { /* Ачивка остаётся в этой сессии. */ }
+        achievement.classList.add('show');
+      }
+
+      document.getElementById('speakButton').addEventListener('click', () => {
+        const submitted = speechField.value.trim();
+        const comparableSpeech = submitted.toLocaleLowerCase('ru-RU').replace(/\s+/g, ' ');
+        speechField.value = '';
+        if (submittedSpeeches.has(comparableSpeech)) {
+          setVerdict('Эта речь уже звучала.', 'neutral');
+          speechField.focus();
+          return;
+        }
+        if (comparableSpeech) submittedSpeeches.add(comparableSpeech);
+        speechField.focus();
+
+        const words = getWords(submitted);
+        const everyTenthIsMeow = words.length >= 10 && words.every((word, index) => (index + 1) % 10 !== 0 || word === 'мяу');
+        if (!containsCaseWord(words) || !everyTenthIsMeow) {
+          acquit();
+          return;
+        }
+
+        // Шанс победы: 0.02% (0.0002) после успешной проверки речи.
+        if (Math.random() < 0.0002) {
+          winCase();
+          return;
+        }
+
+        playMeow();
+        setVerdict('<strong>МАРКУС:</strong> «Мяу.»<br>Дело закрыто. Маркус победил.', 'win');
+      });
+    })();
+  </script>
+</body>
+</html>
